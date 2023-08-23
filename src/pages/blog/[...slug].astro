@@ -2,16 +2,24 @@
 import { CollectionEntry, getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 
-export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.slug },
-		props: post,
-	}));
-}
 type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
+// For SSG, fetch data at build time
+// export async function getStaticPaths() {
+// 	const posts = await getCollection('blog');
+// 	return posts.map((post) => ({
+// 		params: { slug: post.slug },
+// 		props: post,
+// 	}));
+// }
+// const post = Astro.props;
+
+// For SSR, fetch data at request time
+const { slug } = Astro.params;
+const posts = await getCollection('blog');
+const post = posts.find((page) => page.slug === slug);
+if (!post) return Astro.redirect("/404");
+
 const { Content } = await post.render();
 ---
 
